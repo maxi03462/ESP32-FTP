@@ -171,7 +171,10 @@ loop(loop_status_t (*callback)(void))
   loop_status_t status = LOOP_CONTINUE;
 
   while(status == LOOP_CONTINUE)
+  {
+  	vTaskDelay(20 / portTICK_PERIOD_MS);
     status = callback();
+  }
   return status;
 }
 
@@ -181,7 +184,6 @@ void app_main(void)
   esp_err_t ret = nvs_flash_init();
   
   init_Wear_Levelling();
-  write_file();
   
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
   {
@@ -215,7 +217,8 @@ void app_main(void)
   }*/
 
   console_set_status("\n" GREEN STATUS_STRING " DEBUG" RESET);
-
+  write_file();
+  
   while(status == LOOP_RESTART)
   {
     /* initialize ftp subsystem */

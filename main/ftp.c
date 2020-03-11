@@ -32,9 +32,9 @@
 
 #define POLL_UNKNOWN    (~(POLLIN|POLLPRI|POLLOUT))
 
-#define XFER_BUFFERSIZE 32768
-#define SOCK_BUFFERSIZE 32768
-#define FILE_BUFFERSIZE 65536
+#define XFER_BUFFERSIZE 4096
+#define SOCK_BUFFERSIZE XFER_BUFFERSIZE
+#define FILE_BUFFERSIZE XFER_BUFFERSIZE*2
 #define CMD_BUFFERSIZE  4096
 #define SOCU_ALIGN      0x1000
 #define SOCU_BUFFERSIZE 0x100000
@@ -42,7 +42,7 @@
 #ifdef _3DS
 #define DATA_PORT       (LISTEN_PORT+1)
 #else
-#define DATA_PORT       0 /* ephemeral port */
+#define DATA_PORT       (LISTEN_PORT+1) /* ephemeral port */
 #endif
 
 typedef struct ftp_session_t ftp_session_t;
@@ -333,22 +333,22 @@ ftp_set_socket_options(int fd)
   int rc;
 
   /* increase receive buffer size */
-  rc = setsockopt(fd, SOL_SOCKET, SO_RCVBUF,
+  /*rc = setsockopt(fd, SOL_SOCKET, SO_RCVBUF,
                   &sock_buffersize, sizeof(sock_buffersize));
   if(rc != 0)
   {
     console_print(RED "setsockopt: SO_RCVBUF %d %s\n" RESET, errno, strerror(errno));
     return -1;
-  }
+  }*/
 
   /* increase send buffer size */
-  rc = setsockopt(fd, SOL_SOCKET, SO_SNDBUF,
+  /*rc = setsockopt(fd, SOL_SOCKET, SO_SNDBUF,
                   &sock_buffersize, sizeof(sock_buffersize));
   if(rc != 0)
   {
     console_print(RED "setsockopt: SO_SNDBUF %d %s\n" RESET, errno, strerror(errno));
     return -1;
-  }
+  }*/
 
   return 0;
 }
@@ -395,14 +395,14 @@ ftp_closesocket(int  fd,
   }
 
   /* set linger to 0 */
-  struct linger linger;
+  /*struct linger linger;
   linger.l_onoff  = 1;
   linger.l_linger = 0;
   rc = setsockopt(fd, SOL_SOCKET, SO_LINGER,
                   &linger, sizeof(linger));
   if(rc != 0)
     console_print(RED "setsockopt: SO_LINGER %d %s\n" RESET,
-                  errno, strerror(errno));
+                  errno, strerror(errno));*/
 
   /* close socket */
   rc = close(fd);
@@ -1333,6 +1333,10 @@ ftp_session_connect(ftp_session_t *session)
     console_print(RED "socket: %d %s\n" RESET, errno, strerror(errno));
     return -1;
   }
+  else
+  {
+  	console_print("socket Creado\n");
+  }
 
   /* set socket options */
   rc = ftp_set_socket_options(session->data_fd);
@@ -1341,6 +1345,10 @@ ftp_session_connect(ftp_session_t *session)
     ftp_closesocket(session->data_fd, false);
     session->data_fd = -1;
     return -1;
+  }
+  else
+  {
+  	console_print("ftp_set_socket_options Ok\n");
   }
 
   /* set socket to non-blocking */
